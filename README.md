@@ -17,10 +17,8 @@ This app reproduces the core ecrdash dashboard experience using Streamlit:
 
 Pages:
 
-- Home: app.py
-- Overview: pages/1_Overview.py
-- Reports Explorer: pages/2_Reports_Explorer.py
-- Location Map: pages/3_Location_Map.py
+- Home: Dashboard.py
+- Help: pages/4_Help.py
 
 ## Run Locally
 
@@ -34,7 +32,7 @@ Pages:
 3. Start the app:
 
 	```bash
-	streamlit run app.py
+	streamlit run Dashboard.py
 	```
 
 4. Open the local URL shown by Streamlit in your browser.
@@ -67,11 +65,9 @@ If no files are present, the app uses synthetic sample data so pages still rende
 
 ```
 .
-├── app.py
+├── Dashboard.py
 ├── pages
-│   ├── 1_Overview.py
-│   ├── 2_Reports_Explorer.py
-│   └── 3_Location_Map.py
+│   └── 4_Help.py
 ├── requirements.txt
 └── utils
 	└── data.py

@@ -35,19 +35,6 @@ REPORT_COLUMNS = [
     "gpu_cores_used",
 ]
 
-COUNTRY_COORDS = {
-    "Germany": {"lat": 51.1657, "lon": 10.4515},
-    "Spain": {"lat": 40.4637, "lon": -3.7492},
-    "France": {"lat": 46.2276, "lon": 2.2137},
-    "Italy": {"lat": 41.8719, "lon": 12.5674},
-    "Netherlands": {"lat": 52.1326, "lon": 5.2913},
-    "Belgium": {"lat": 50.5039, "lon": 4.4699},
-    "Switzerland": {"lat": 46.8182, "lon": 8.2275},
-    "Austria": {"lat": 47.5162, "lon": 14.5501},
-    "United Kingdom": {"lat": 55.3781, "lon": -3.4360},
-    "Sweden": {"lat": 60.1282, "lon": 18.6435},
-}
-
 GITHUB_REPORTS_API_URL = "https://api.github.com/repos/ghoshted/ecrdash/contents/reports_output_dir"
 
 
@@ -325,14 +312,6 @@ def aggregate_reports(df: pd.DataFrame) -> dict[str, Any]:
         .sort_values(["start_day", "memory_used_mb"], ascending=[True, False])
     )
 
-    by_country = (
-        safe[safe["address_country"].astype(str).str.len() > 0]
-        .groupby("address_country", as_index=False)
-        .agg(count=("address_country", "size"))
-        .sort_values(["count", "address_country"], ascending=[False, True])
-        .rename(columns={"address_country": "country"})
-    )
-
     return {
         "totals": totals,
         "averages": averages,
@@ -340,26 +319,7 @@ def aggregate_reports(df: pd.DataFrame) -> dict[str, Any]:
         "by_day": by_day,
         "by_infra": by_infra,
         "by_day_tool_memory": by_day_tool_memory,
-        "by_country": by_country,
     }
-
-
-def map_points_from_reports(df: pd.DataFrame) -> pd.DataFrame:
-    countries = (
-        df[df["address_country"].astype(str).str.len() > 0]
-        .groupby("address_country", as_index=False)
-        .agg(count=("address_country", "size"))
-        .rename(columns={"address_country": "country"})
-    )
-
-    if countries.empty:
-        return pd.DataFrame(columns=["country", "count", "lat", "lon"])
-
-    points = countries.assign(
-        lat=countries["country"].map(lambda c: COUNTRY_COORDS.get(c, {}).get("lat")),
-        lon=countries["country"].map(lambda c: COUNTRY_COORDS.get(c, {}).get("lon")),
-    )
-    return points.dropna(subset=["lat", "lon"]).sort_values("count", ascending=False)
 
 
 def format_bytes(num_bytes: int) -> str:

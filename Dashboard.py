@@ -4,7 +4,9 @@ from pathlib import Path
 
 from utils.data import aggregate_reports, format_bytes, format_duration, load_reports
 
-st.title("Overview")
+st.set_page_config(page_title="ECRDash", page_icon="📦", layout="wide")
+
+st.markdown("## Compute Report Dashboard")
 
 reports = load_reports(Path("."))
 summary = aggregate_reports(reports)
@@ -20,13 +22,15 @@ slug_to_name = dict(zip(tool_map["tool_slug"], tool_map["tool_name"]))
 totals = summary["totals"]
 averages = summary["averages"]
 
-cards = st.columns(6)
-cards[0].metric("Total Runs", totals["reports"])
-cards[1].metric("Total Runtime", format_duration(totals["duration_seconds"]))
-cards[2].metric("Input Size", format_bytes(totals["input_size_bytes"]))
-cards[3].metric("Output Size", format_bytes(totals["output_size_bytes"]))
-cards[4].metric("Avg Runtime", format_duration(averages["duration_seconds"]))
-cards[5].metric("Avg Memory", f"{averages['memory_used_mb']:,} MB")
+cards_1 = st.columns(3)
+cards_1[0].metric("Total Runs", totals["reports"])
+cards_1[1].metric("Total Runtime", format_duration(totals["duration_seconds"]))
+cards_1[2].metric("Input Size", format_bytes(totals["input_size_bytes"]))
+
+cards_2 = st.columns(3)
+cards_2[0].metric("Output Size", format_bytes(totals["output_size_bytes"]))
+cards_2[1].metric("Avg Runtime", format_duration(averages["duration_seconds"]))
+cards_2[2].metric("Avg Memory", f"{averages['memory_used_mb']:,} MB")
 
 st.divider()
 
@@ -34,13 +38,14 @@ query_value = st.query_params.get("tool")
 query_slug = query_value[0] if isinstance(query_value, list) and query_value else query_value
 query_tool = slug_to_name.get(str(query_slug), "All tools") if query_slug else "All tools"
 
-tool_filter = st.selectbox(
+tool_filter = st.sidebar.selectbox(
     "Filter by tool",
     options=["All tools"] + sorted(reports["tool_name"].dropna().unique().tolist()),
     index=(["All tools"] + sorted(reports["tool_name"].dropna().unique().tolist())).index(query_tool)
     if query_tool in (["All tools"] + sorted(reports["tool_name"].dropna().unique().tolist()))
     else 0,
 )
+st.markdown(f"### Showing report runs for: **{tool_filter}**")
 
 selected_slug = name_to_slug.get(tool_filter)
 if tool_filter == "All tools":
